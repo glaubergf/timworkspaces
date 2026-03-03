@@ -321,6 +321,17 @@ ipcMain.handle('toggle-fullscreen', () => {
 
 app.on('web-contents-created', (_, webContents) => {
   if (webContents.getType?.() === 'webview') {
+    // Grant media permissions so webviews can access microphone, camera and audio
+    webContents.session.setPermissionRequestHandler((_wc, permission, callback) => {
+      const allowed = ['media', 'microphone', 'camera', 'audioCapture', 'videoCapture', 'notifications', 'display-capture'];
+      callback(allowed.includes(permission));
+    });
+
+    webContents.session.setPermissionCheckHandler((_wc, permission) => {
+      const allowed = ['media', 'microphone', 'camera', 'audioCapture', 'videoCapture'];
+      return allowed.includes(permission);
+    });
+
     webContents.setWindowOpenHandler(({ url }) => {
       if (!url || typeof url !== 'string' || (!url.startsWith('http://') && !url.startsWith('https://'))) {
         return { action: 'deny' };
